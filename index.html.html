@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SheetMind - AI Data Analyst</title>
+<style>
+:root{--bg:#070b16;--panel:#0e1426;--line:#1f2a44;--tx:#e8edf8;--mut:#8b97b5;--ac:#2ee6b6;--ac2:#f5b84b;--bad:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--ac);display:grid;place-items:center;color:#06231b;font-weight:800;font-size:22px}
+h1{margin:0;font-size:22px}.sub{color:var(--mut);font-size:13px}
+.btn{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--ac)}.btn.pri{background:var(--ac);color:#06231b;border-color:var(--ac);font-weight:700}
+.btn:disabled{opacity:.5;cursor:wait}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+main{max-width:1040px;margin:0 auto;padding:36px 20px 80px}
+.hero{text-align:center;margin-bottom:28px}
+.hero h2{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:0 0 12px;letter-spacing:-.02em}
+.hero p{color:var(--mut);max-width:680px;margin:0 auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:20px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tab{background:none;border:1px solid transparent;color:var(--mut);padding:9px 16px;border-radius:10px;font:inherit;cursor:pointer}
+.tab[aria-selected=true]{color:var(--ac);border-color:var(--ac);background:#0b2a2a}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 6px}
+input[type=text],input[type=url],textarea{width:100%;background:#080d1b;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font:inherit}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:30px;text-align:center;color:var(--mut)}
+.samples{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.sample{text-align:left;background:#080d1b;border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--tx);font:inherit;cursor:pointer}
+.sample[aria-pressed=true]{border-color:var(--ac)}.sample small{display:block;color:var(--mut)}
+.hint{color:var(--mut);font-size:13px;margin-top:8px}
+.status{margin-top:12px;font-size:14px}.err{color:var(--bad)}.ok{color:var(--ac)}
+.steps{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.step{padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:var(--mut);font-size:13px}
+.step.run{color:var(--ac2);border-color:var(--ac2)}.step.done{color:var(--ac);border-color:var(--ac)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:#080d1b;border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi b{display:block;font-size:28px;color:var(--ac)}.kpi span{color:var(--mut);font-size:13px}
+h3{margin:0 0 10px;font-size:18px}
+ul{margin:0;padding-left:20px}li{margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600}
+.wrap{overflow-x:auto}
+.bar{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px}
+.bar i{display:block;height:14px;background:var(--ac);border-radius:4px}.bar em{min-width:110px;font-style:normal;color:var(--mut)}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;border:1px solid var(--ac);color:var(--ac);margin-left:8px;vertical-align:middle}
+.tag.warn{border-color:var(--ac2);color:var(--ac2)}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:16px;max-width:520px;width:92%}
+dialog::backdrop{background:#000a}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">S</div><div><h1>SheetMind <span class="tag" id="modeTag">Local mode</span></h1><div class="sub">Google Sheet ingest, statistical profiling, executive insights</div></div></div>
+  <div><button class="btn" id="cfgBtn">n8n settings</button> <button class="btn" id="expBtn" disabled>Download report</button></div>
+</header>
+
+<main>
+  <section class="hero">
+    <h2>Share a Google Sheet.<br>Get executive insights.</h2>
+    <p>Load your data, ask a question, and get KPIs, outliers and recommendations. Connect your n8n workflow to add Gemini-written analysis.</p>
+  </section>
+
+  <section class="card" aria-label="Data source">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-t="url">Google Sheet link</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="csv">Upload CSV</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="sample">Sample data</button>
+    </div>
+    <div id="p-url">
+      <label for="sheetUrl">Google Sheet link</label>
+      <input type="url" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+      <p class="hint">The sheet must be shared as "Anyone with the link can view". Only the tab in the link (gid) is read.</p>
+    </div>
+    <div id="p-csv" hidden>
+      <div class="drop"><label for="file" style="margin:0 0 8px">Choose a .csv file (exported from Google Sheets or Excel)</label><input type="file" id="file" accept=".csv,text/csv"></div>
+    </div>
+    <div id="p-sample" hidden>
+      <div class="samples">
+        <button class="sample" data-s="sales" aria-pressed="true"><b>Sales orders</b><small>120 orders with regions, products and revenue</small></button>
+        <button class="sample" data-s="hemm" aria-pressed="false"><b>Equipment maintenance</b><small>60 machine service records with hours and downtime</small></button>
+      </div>
+    </div>
+    <label for="q">What do you want to know?</label>
+    <input type="text" id="q" value="Give me an executive summary with key KPIs and unusual values">
+    <div style="margin-top:16px"><button class="btn pri" id="go">Analyze data</button></div>
+    <div class="status" id="status" role="status"></div>
+  </section>
+
+  <div class="steps" id="steps" hidden></div>
+  <div id="out"></div>
+</main>
+
+<dialog id="dlg">
+  <h3>n8n settings</h3>
+  <p class="hint">Optional. Paste the Production URL of your SheetMind workflow's webhook. Leave empty to analyze locally in this browser.</p>
+  <label for="hook">Webhook URL</label>
+  <input type="url" id="hook" placeholder="https://your-n8n.com/webhook/sheetmind-ingest">
+  <p class="hint">Your n8n webhook must allow this page's origin (Allowed Origins in the Webhook node). Data is sent only to this URL.</p>
+  <div class="row"><button class="btn" id="cfgClose">Close</button><button class="btn pri" id="cfgSave">Save</button></div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tab='url',sample='sales',csvRows=null,last=null;
+const store={get:k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- parsing ---------- */
+function parseCSV(t){const r=[];let row=[],c='',q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}
+    else if(ch=='"')q=true;else if(ch==','){row.push(c);c=''}
+    else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;row.push(c);r.push(row);row=[];c=''}
+    else c+=ch}
+  if(c!==''||row.length){row.push(c);r.push(row)}return r.filter(x=>x.some(v=>v.trim()!==''))}
+
+/* ---------- sample data ---------- */
+function rng(seed){return()=>(seed=(seed*16807)%2147483647)/2147483647}
+function makeSample(k){const r=rng(42),pick=a=>a[Math.floor(r()*a.length)];
+  if(k=='sales'){const d=[['Order ID','Date','Region','Product','Units','Revenue']];
+    const pr={Laptop:48000,Monitor:14000,Keyboard:2500,Mouse:900};
+    for(let i=1;i<=120;i++){const p=pick(Object.keys(pr)),u=1+Math.floor(r()*6),m=1+((i%12)/10);
+      d.push(['O-'+(1000+i),'2025-'+String(1+i%12).padStart(2,'0')+'-'+String(1+i%27).padStart(2,'0'),pick(['North','South','East','West']),p,u,Math.round(pr[p]*u*m)])}
+    d.push(['O-1121','2025-12-30','West','Laptop',40,3200000]);return d}
+  const d=[['Machine','Type','Service Date','Run Hours','Downtime Hrs','Repair Cost']];
+  for(let i=1;i<=60;i++){d.push(['HEMM-'+String(i%12+1).padStart(2,'0'),pick(['Dumper','Excavator','Dozer','Loader']),'2025-'+String(1+i%12).padStart(2,'0')+'-'+String(1+i%27).padStart(2,'0'),Math.round(200+r()*600),Math.round(2+r()*20),Math.round(15000+r()*90000)])}
+  d.push(['HEMM-03','Dumper','2025-11-11',950,168,1450000]);return d}
+
+/* ---------- profiling (same logic as the n8n Code node) ---------- */
+const num=v=>{if(v==null)return null;const s=String(v).trim().replace(/[,\s$€£₹%]/g,'');return(s===''||!/^-?\d+(\.\d+)?$/.test(s))?null:Number(s)};
+const r2=x=>Math.round(x*100)/100;
+function profile(data){
+  const headers=data[0].map((h,i)=>String(h??'').trim()||'Column '+(i+1));
+  const rows=data.slice(1).filter(r=>r.some(c=>String(c??'').trim()!==''));
+  const columns=[],anomalies=[];
+  headers.slice(0,40).forEach((name,c)=>{
+    const cells=rows.map(r=>r[c]),ne=cells.filter(v=>String(v??'').trim()!==''),missing=rows.length-ne.length;
+    const nums=ne.map(num).filter(v=>v!==null);
+    if(ne.length&&nums.length/ne.length>=.8){
+      const n=nums.length,sum=nums.reduce((a,b)=>a+b,0),mean=sum/n,s=[...nums].sort((a,b)=>a-b);
+      const median=n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2;
+      const std=n>1?Math.sqrt(nums.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)):0;
+      columns.push({name,type:'number',count:n,missing,sum:r2(sum),mean:r2(mean),median:r2(median),std:r2(std),min:s[0],max:s[n-1]});
+      if(std>0){const th=n>=30?3:2;let f=0;
+        rows.forEach((r,i)=>{const v=num(r[c]);if(v===null||f>=5)return;const z=(v-mean)/std;
+          if(Math.abs(z)>th){f++;anomalies.push({column:name,row:i+2,value:v,zScore:r2(z)})}})}
+    }else{
+      const fr={};ne.forEach(v=>{const k=String(v).trim();fr[k]=(fr[k]||0)+1});
+      const top=Object.entries(fr).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([value,count])=>({value,count}));
+      columns.push({name,type:'text',count:ne.length,missing,unique:Object.keys(fr).length,top})}});
+  return{rowCount:rows.length,columnCount:headers.length,columns,anomalies:anomalies.slice(0,20)}}
+
+function localInsights(p){
+  const nc=p.columns.filter(c=>c.type=='number'),tc=p.columns.filter(c=>c.type=='text'&&c.unique>1&&c.unique<=20);
+  const miss=p.columns.reduce((a,c)=>a+c.missing,0),f=[],rec=[];
+  nc.slice(0,4).forEach(c=>f.push(`${c.name}: total ${c.sum.toLocaleString()}, average ${c.mean.toLocaleString()}, range ${c.min.toLocaleString()} to ${c.max.toLocaleString()}.`));
+  tc.slice(0,2).forEach(c=>{const t=c.top[0];f.push(`Most common ${c.name}: ${t.value} (${Math.round(t.count/c.count*100)}% of rows).`)});
+  const an=p.anomalies.map(a=>`${a.column} in row ${a.row} is ${a.value.toLocaleString()} (z-score ${a.zScore}), far from the typical value.`);
+  if(an.length)rec.push('Check the flagged rows for entry errors or genuine one-off events before using the totals.');
+  if(miss)rec.push(`Fill the ${miss} empty cell(s) to make averages more reliable.`);
+  rec.push('Connect your n8n workflow in n8n settings for Gemini-written analysis and recommendations.');
+  return{headline:`${p.rowCount.toLocaleString()} rows, ${p.columnCount} columns, ${p.anomalies.length} unusual value(s)`,
+    summary:`The sheet has ${p.rowCount.toLocaleString()} rows and ${p.columnCount} columns (${nc.length} numeric). ${an.length?'Some numeric values are statistical outliers and may distort totals.':'No strong outliers were found.'}`,
+    answer:'',kpis:[{label:'Rows',value:p.rowCount.toLocaleString()},{label:'Columns',value:p.columnCount},{label:'Outliers',value:p.anomalies.length},{label:'Empty cells',value:miss}],
+    keyFindings:f,anomalies:an,recommendations:rec}}
+
+/* ---------- data loading ---------- */
+async function loadData(){
+  if(tab=='sample')return{name:sample=='sales'?'Sales orders (sample)':'Equipment maintenance (sample)',data:makeSample(sample)};
+  if(tab=='csv'){if(!csvRows)throw new Error('Choose a CSV file first.');return{name:$('#file').files[0].name,data:csvRows}}
+  const u=$('#sheetUrl').value.trim(),m=u.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if(!m)throw new Error('Paste a full Google Sheet link (it contains /d/ and an ID).');
+  const g=u.match(/[#&?]gid=(\d+)/);
+  let res;try{res=await fetch(`https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv${g?'&gid='+g[1]:''}`)}
+  catch(e){throw new Error('Could not reach Google Sheets. Check your internet connection, or upload the sheet as CSV instead.')}
+  if(!res.ok)throw new Error('Google refused access. Set the sheet to "Anyone with the link can view", or upload it as CSV.');
+  const t=await res.text();if(t.trim().startsWith('<'))throw new Error('The sheet is private. Set sharing to "Anyone with the link can view", or upload it as CSV.');
+  return{name:'Google Sheet '+m[1].slice(0,6)+'...',spreadsheetId:m[1],data:parseCSV(t)}}
+
+/* ---------- n8n ---------- */
+async function callN8n(url,payload){
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!res.ok)throw new Error('n8n answered with status '+res.status);
+  const j=await res.json();if(!j||!j.insights)throw new Error('n8n response has no "insights" field.');return j}
+
+/* ---------- UI ---------- */
+const STEPS=['Ingest sheet','Profile columns','Detect outliers','Write insights'];
+function setStep(i,fail){$('#steps').hidden=false;$('#steps').innerHTML=STEPS.map((s,k)=>`<span class="step ${k<i?'done':k==i?(fail?'':'run'):''}">${esc(s)}</span>`).join('')}
+const tick=()=>new Promise(r=>setTimeout(r,250));
+function setStatus(t,c){const e=$('#status');e.textContent=t;e.className='status '+(c||'')}
+
+async function run(){
+  const btn=$('#go');btn.disabled=true;setStatus('');$('#out').innerHTML='';
+  try{
+    setStep(0);const src=await loadData();
+    if(src.data.length<2)throw new Error('The sheet needs a header row and at least one data row.');
+    setStep(1);await tick();const p=profile(src.data);
+    setStep(2);await tick();
+    setStep(3);let ins=localInsights(p),mode='Local analysis',hook=store.get('sm_hook');
+    if(hook){try{const j=await callN8n(hook,{sheetName:src.name,spreadsheetId:src.spreadsheetId||'',query:$('#q').value,sheetData:src.data});
+        ins=j.insights;mode='Analyzed by n8n + Gemini'}catch(e){setStatus('n8n failed ('+e.message+'). Showing local analysis instead.','err')}}
+    setStep(4);last={sheet:src.name,mode,profile:p,insights:ins,generatedAt:new Date().toISOString()};
+    last.rows=src.data.slice(1);last.headers=src.data[0];
+    render();$('#expBtn').disabled=false;
+    if(!$('#status').textContent)setStatus('Done. '+mode+'.','ok')
+  }catch(e){setStatus(e.message,'err');$('#steps').hidden=true}
+  btn.disabled=false}
+
+const list=a=>a&&a.length?'<ul>'+a.map(x=>'<li>'+esc(typeof x=='string'?x:JSON.stringify(x))+'</li>').join('')+'</ul>':'<p class="hint">Nothing to report.</p>';
+function render(){
+  const {profile:p,insights:i,mode}=last;
+  const kp=(i.kpis||[]).map(k=>`<div class="kpi"><b>${esc(k.value)}</b><span>${esc(k.label)}${k.note?' - '+esc(k.note):''}</span></div>`).join('');
+  const tc=p.columns.find(c=>c.type=='text'&&c.unique>1&&c.unique<=20);
+  let chart='';if(tc){const mx=tc.top[0].count;chart=`<div class="card"><h3>${esc(tc.name)}: most common values</h3>`+tc.top.map(t=>`<div class="bar"><em>${esc(t.value)}</em><i style="width:${Math.max(2,t.count/mx*60)}%"></i><span>${t.count}</span></div>`).join('')+'</div>'}
+  $('#out').innerHTML=`
+  <div class="card"><h3>${esc(i.headline)}<span class="tag${mode=='Local analysis'?' warn':''}">${esc(mode)}</span></h3><p>${esc(i.summary)}</p>${i.answer?'<p><b>Answer:</b> '+esc(i.answer)+'</p>':''}</div>
+  <div class="kpis">${kp}</div>
+  <div class="card"><h3>Key findings</h3>${list(i.keyFindings)}</div>
+  <div class="card"><h3>Unusual values</h3>${list(i.anomalies)}
+    ${p.anomalies.length?`<div class="wrap" style="margin-top:12px"><table><tr><th>Column</th><th>Sheet row</th><th>Value</th><th>Z-score</th></tr>${p.anomalies.map(a=>`<tr><td>${esc(a.column)}</td><td>${a.row}</td><td>${a.value.toLocaleString()}</td><td>${a.zScore}</td></tr>`).join('')}</table></div>`:''}</div>
+  <div class="card"><h3>Recommendations</h3>${list(i.recommendations)}</div>
+  ${chart}
+  <div class="card"><h3>Column profile</h3><div class="wrap"><table><tr><th>Column</th><th>Type</th><th>Filled</th><th>Missing</th><th>Details</th></tr>
+  ${p.columns.map(c=>`<tr><td>${esc(c.name)}</td><td>${c.type}</td><td>${c.count}</td><td>${c.missing}</td><td>${c.type=='number'?`mean ${c.mean.toLocaleString()}, median ${c.median.toLocaleString()}, min ${c.min.toLocaleString()}, max ${c.max.toLocaleString()}`:`${c.unique} unique, top: ${esc(c.top[0]?c.top[0].value:'-')}`}</td></tr>`).join('')}</table></div></div>`;
+  $('#out').scrollIntoView({behavior:'smooth'})}
+
+/* ---------- events ---------- */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{tab=b.dataset.t;
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x==b));
+  ['url','csv','sample'].forEach(t=>$('#p-'+t).hidden=t!=tab)});
+document.querySelectorAll('.sample').forEach(b=>b.onclick=()=>{sample=b.dataset.s;document.querySelectorAll('.sample').forEach(x=>x.setAttribute('aria-pressed',x==b))});
+$('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{csvRows=parseCSV(String(r.result));setStatus(f.name+' loaded: '+(csvRows.length-1)+' rows.','ok')};r.readAsText(f)};
+$('#go').onclick=run;
+const dlg=$('#dlg'),tagUpdate=()=>{$('#modeTag').textContent=store.get('sm_hook')?'n8n connected':'Local mode'};
+$('#cfgBtn').onclick=()=>{$('#hook').value=store.get('sm_hook');dlg.showModal()};
+$('#cfgClose').onclick=()=>dlg.close();
+$('#cfgSave').onclick=()=>{store.set('sm_hook',$('#hook').value.trim());tagUpdate();dlg.close()};
+$('#expBtn').onclick=()=>{const b=new Blob([JSON.stringify({sheet:last.sheet,mode:last.mode,generatedAt:last.generatedAt,insights:last.insights,profile:last.profile},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='sheetmind-report.json';a.click();URL.revokeObjectURL(a.href)};
+tagUpdate();
+</script>
+</body>
+</html>
